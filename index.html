@@ -116,6 +116,39 @@ h1{font-size:18px;margin:0;font-weight:700}h2{font-size:13px;margin:14px 0 6px;f
 .sw-row{display:flex;gap:10px;margin:6px 0}.cs{width:34px;height:34px;border-radius:50%;cursor:pointer;border:2px solid transparent;display:grid;place-items:center}.cs.on{border-color:#fff}
 .about{text-align:center;line-height:1.7}
 @media (max-width:520px){body{padding:0}.top,.sb{display:none}.phone{width:100vw;height:100dvh;border-radius:0;border:0;box-shadow:none}}
+
+#side{display:none}
+.turn{margin:14px 0}
+.turn.u{display:flex;justify-content:flex-end}
+.u-bub{max-width:84%;background:color-mix(in srgb,var(--v) 22%,var(--s2));border-radius:18px 18px 4px 18px;padding:9px 13px;font-size:14px;line-height:1.5;word-break:break-word}
+.a-meta{font-size:11px;color:var(--mu);margin-bottom:4px}
+.a-txt{font-size:14.5px;line-height:1.65;word-break:break-word}
+.a-txt p{margin:.5em 0}.a-txt h3,.a-txt h4,.a-txt h5,.a-txt h6{margin:.8em 0 .3em;font-size:15px}
+.a-txt ul,.a-txt ol{margin:.4em 0 .4em 1.2em;padding:0}
+.a-txt code{background:var(--s2);padding:1px 5px;border-radius:6px;font:12px ui-monospace,Menlo,Consolas,monospace}
+.a-txt pre{background:#0a0c16;border-radius:12px;padding:10px;overflow:auto;margin:.6em 0}
+.a-txt pre code{background:none;padding:0;font-size:12px;color:#dfe3f5}
+.a-txt blockquote{margin:.5em 0;padding-left:10px;border-left:3px solid var(--line);color:var(--mu)}
+.a-txt .tw{overflow:auto;margin:.6em 0}.a-txt table{border-collapse:collapse;font-size:12.5px}.a-txt th,.a-txt td{border:1px solid var(--line);padding:4px 8px;text-align:left}
+.a-txt a{color:var(--v)}
+.dsep{text-align:center;font-size:11px;color:var(--mu);margin:16px 0 4px}
+.turn.hit .u-bub,.turn.hit .a-txt{outline:1.5px solid var(--warn);outline-offset:4px;border-radius:8px}
+.rsearch{display:flex;gap:6px;align-items:center;margin:0 0 8px}.rsearch .in{flex:1;min-width:0}.rsearch[hidden]{display:none}
+.rmeta{font-size:12px;color:var(--mu);margin:0 0 10px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.si{padding:7px 9px;border-radius:9px;font-size:12.5px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.si.on{background:var(--s3)}.si:hover{background:var(--s2)}
+.sgrp{font-size:11px;color:var(--mu);margin:10px 6px 4px;font-weight:600}
+.sidehd{padding:6px 8px 10px;font-size:14px}
+.sidefoot{margin-top:auto;display:flex;gap:6px;padding-top:8px}
+@media (min-width:760px){
+.phone{width:940px;height:780px;border-radius:24px}
+.tabs{display:none}
+#side{display:flex;flex-direction:column;position:absolute;left:0;top:34px;bottom:0;width:250px;background:var(--s1);border-right:1px solid var(--line);padding:8px;overflow-y:auto;z-index:2}
+.sb{position:absolute;top:0;left:0;right:0;z-index:3}
+.main{position:absolute;left:250px;right:0;top:34px;bottom:0}
+.screen{padding-bottom:24px}
+.abar{bottom:12px}
+}
 </style>
 </head>
 <body>
@@ -150,6 +183,7 @@ h1{font-size:18px;margin:0;font-weight:700}h2{font-size:13px;margin:14px 0 6px;f
 <input type="file" id="file" accept=".zip,.json,application/zip,application/json" multiple hidden>
 
 <div class="phone" id="phone" data-s="welcome">
+  <div id="side"></div>
   <div class="sb"><span id="clock"></span><span>ChatVault</span></div>
   <div class="main" id="main">
 
@@ -188,8 +222,9 @@ h1{font-size:18px;margin:0;font-weight:700}h2{font-size:13px;margin:14px 0 6px;f
     </div>
 
     <div class="screen" id="s-reader">
-      <div class="hd"><div data-a="go" data-id="lib" style="cursor:pointer;padding:4px"><svg class="ic2" style="width:22px;height:22px"><use href="#i-back"/></svg></div><div class="grow"><div class="t" id="rt" style="font-size:15px"></div></div><div class="btn p sm" data-a="extractone">Extract</div></div>
-      <div class="card" id="rinfo"></div>
+      <div class="hd"><div data-a="go" data-id="lib" style="cursor:pointer;padding:4px"><svg class="ic2" style="width:22px;height:22px"><use href="#i-back"/></svg></div><div class="grow"><div class="t" id="rt" style="font-size:15px"></div></div><div class="btn sm" data-a="rsopen">Find</div><div class="btn p sm" data-a="extractone">Extract</div></div>
+      <div class="rsearch" id="rsearch" hidden><input class="in" id="rq" placeholder="Search this chat, e.g. gummy loaf"><span class="chip" id="rcount"></span><div class="btn sm" data-a="rprev">Up</div><div class="btn sm" data-a="rnext">Down</div><div class="btn sm" data-a="rsclose">Close</div></div>
+      <div class="rmeta" id="rinfo"></div>
       <div id="rbody"></div>
     </div>
 
@@ -460,6 +495,7 @@ const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
 let backups=[],chats=[],projMeta=[];
 const assign=ls("cv_assign",{}),S=Object.assign({fmt:"md",dt:true,theme:"Violet"},ls("cv_set",{}));
 const sel=new Set(),fold={},lim={};
+let rquery="",rmatch=[],rpos=0;
 let cur="welcome",view="chats",src="all",q="",rkey=null,rall=false,rimgs=[],tq=0,AS={name:"",pick:""};
 const D={fmt:"md",art:true,img:true,ins:false,dt:true,sort:"proj",ids:[],phase:"form",pct:0,name:"",busy:false};
 const themes={Violet:["#8b6cff","#ff5fb0"],Ocean:["#3ea0ff","#19d3b0"],Sunset:["#ff8a3d","#ff4f7a"],Forest:["#2fbf6e","#b6e04d"],Berry:["#c05cff","#6a5cff"]};
@@ -509,23 +545,53 @@ function renderLib(){
  document.querySelectorAll("#views b").forEach(b=>b.classList.toggle("on",b.dataset.id===view));
  document.querySelectorAll("#srcs .chip").forEach(b=>b.style.outline=b.dataset.id===src?"1.5px solid var(--v)":"none");bar()}
 
-function fmtText(t){const p=String(t||"").split(/```/);return p.map((s,i)=>i%2?"<pre>"+esc(s.replace(/^\w*\n/,""))+"</pre>":esc(s)).join("")}
-function msgHtml(c,m){let h='<div class="msg'+(m.role==="me"?" me":"")+'"><div class="who"><b>'+who(c,m)+'</b>'+(m.t?" · "+dmy(m.t):"")+'</div><div class="bub">'+fmtText(m.text);
- (m.imgs||[]).forEach(r=>{if(r.missing)h+='<div class="att">'+ic("image")+'<div class="grow"><div class="t">'+esc(r.name)+'</div><div class="sub">Not included in your export</div></div></div>';
-  else{rimgs.push(r);h+='<div class="att">'+ic("image")+'<div class="grow"><div class="t">'+esc(r.name)+'</div><div class="sub">'+sizeTxt(r.size||0)+'</div></div><div class="btn sm" data-a="imgshow" data-id="'+(rimgs.length-1)+'">Show</div></div>'}});
+function mdHtml(src){
+ const codes=[];
+ let t=String(src==null?"":src).replace(/```[^\n`]*\n?([\s\S]*?)```/g,(m,b)=>{codes.push('<pre><code>'+esc(b.replace(/\n$/,""))+'</code></pre>');return "\u0001"+(codes.length-1)+"\u0001"});
+ t=esc(t);
+ const L=t.split("\n"),out=[];let para=[],i=0;
+ const flush=()=>{if(para.length){out.push("<p>"+inl(para.join("<br>"))+"</p>");para=[]}};
+ const cells=s=>s.trim().replace(/^\|/,"").replace(/\|$/,"").split("|").map(x=>x.trim());
+ while(i<L.length){const ln=L[i],tr=ln.trim();
+  const ph=tr.match(/^\u0001(\d+)\u0001$/);
+  if(ph){flush();out.push("\u0001"+ph[1]+"\u0001");i++;continue}
+  if(/^\|.*\|$/.test(tr)&&i+1<L.length&&/^\|?\s*:?-{2,}/.test(L[i+1].trim())){flush();const hd=cells(tr);i+=2;const rows=[];
+   while(i<L.length&&/^\|.*\|$/.test(L[i].trim())){rows.push(cells(L[i]));i++}
+   out.push('<div class="tw"><table><thead><tr>'+hd.map(c=>"<th>"+inl(c)+"</th>").join("")+"</tr></thead><tbody>"+rows.map(r=>"<tr>"+r.map(c=>"<td>"+inl(c)+"</td>").join("")+"</tr>").join("")+"</tbody></table></div>");continue}
+  const hm=tr.match(/^(#{1,4})\s+(.*)$/);
+  if(hm){flush();const k=hm[1].length+2;out.push("<h"+k+">"+inl(hm[2])+"</h"+k+">");i++;continue}
+  if(/^[-*]\s+/.test(tr)){flush();const it=[];while(i<L.length&&/^[-*]\s+/.test(L[i].trim())){it.push(L[i].trim().replace(/^[-*]\s+/,""));i++}out.push("<ul>"+it.map(x=>"<li>"+inl(x)+"</li>").join("")+"</ul>");continue}
+  if(/^\d+[.)]\s+/.test(tr)){flush();const it=[];while(i<L.length&&/^\d+[.)]\s+/.test(L[i].trim())){it.push(L[i].trim().replace(/^\d+[.)]\s+/,""));i++}out.push("<ol>"+it.map(x=>"<li>"+inl(x)+"</li>").join("")+"</ol>");continue}
+  if(/^&gt;/.test(tr)){flush();const q=[];while(i<L.length&&/^&gt;/.test(L[i].trim())){q.push(L[i].trim().replace(/^&gt;\s?/,""));i++}out.push("<blockquote>"+inl(q.join("<br>"))+"</blockquote>");continue}
+  if(!tr){flush();i++;continue}
+  para.push(ln);i++}
+ flush();
+ return out.join("").replace(/\u0001(\d+)\u0001/g,(m,n)=>codes[+n])}
+function inl(s){return s.replace(/`([^`\n]+)`/g,"<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g,"<b>$1</b>").replace(/(^|[^*\w])\*([^*\n]+)\*/g,"$1<i>$2</i>").replace(/\[([^\]\n]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')}
+function msgBody(m){
+ let h="";
+ (m.imgs||[]).forEach(r=>{if(r.missing)h+='<div class="att">'+ic("image")+'<div class="grow"><div class="t">'+esc(r.name)+'</div><div class="sub">Not included in your export</div></div></div>';else{rimgs.push(r);h+='<div class="att">'+ic("image")+'<div class="grow"><div class="t">'+esc(r.name)+'</div><div class="sub">'+sizeTxt(r.size||0)+'</div></div><div class="btn sm" data-a="imgshow" data-id="'+(rimgs.length-1)+'">Show</div></div>'}});
  (m.att||[]).forEach(a=>h+='<div class="att">'+ic("code")+'<div class="grow"><div class="t">'+esc(a.name)+'</div><div class="sub">Attachment'+(a.size?" · "+sizeTxt(a.size):"")+'</div></div></div>');
- return h+'</div></div>'}
-function openChat(k){rkey=k;rall=false;go("reader");renderReader()}
+ return h}
+function turnHtml(c,m,i){
+ if(m.role==="me")return '<div class="turn u" data-i="'+i+'"><div class="u-bub">'+esc(m.text||"").replace(/\n/g,"<br>")+msgBody(m)+'</div></div>';
+ return '<div class="turn a" data-i="'+i+'"><div class="a-meta">'+esc(who(c,m))+(m.t?" · "+dmy(m.t):"")+'</div><div class="a-txt">'+mdHtml(m.text)+msgBody(m)+'</div></div>'}
+function blockHtml(c,list){let h="",day="";list.forEach(([m,i])=>{const d=m.t?dmyOnly(m.t):"";if(d&&d!==day){day=d;h+='<div class="dsep"><span>'+d+'</span></div>'}h+=turnHtml(c,m,i)});return h}
+function applyHits(){const c=byKey(rkey);rmatch=c&&rquery?c.msgs.map((m,i)=>[m,i]).filter(x=>(x[0].text||"").toLowerCase().includes(rquery)).map(x=>x[1]):[];
+ document.querySelectorAll("#rbody [data-i]").forEach(el=>el.classList.toggle("hit",rmatch.includes(+el.dataset.i)));
+ const k=$("rcount");if(k)k.textContent=rquery?(rmatch.length?(rpos+1)+" of "+rmatch.length:"No matches"):""}
+function goHit(p){if(!rmatch.length)return;rpos=(p+rmatch.length)%rmatch.length;const el=document.querySelector('#rbody [data-i="'+rmatch[rpos]+'"]');if(el)el.scrollIntoView({block:"center",behavior:"smooth"});applyHits()}
+function runSearch(){rquery=($("rq").value||"").trim().toLowerCase();rpos=0;if(rquery&&!rall){rall=true;renderReader()}else{applyHits();if(rmatch.length)goHit(0)}}
 function renderReader(){const c=byKey(rkey);if(!c)return;rimgs=[];$("rt").textContent=c.title;
- const a=c.msgs[0],b=c.msgs[c.msgs.length-1];
- $("rinfo").innerHTML='<div class="sub" style="font-size:12px"><span>'+c.msgs.length+' messages</span><span>'+sizeTxt(c.bytes)+'</span><span>'+c.arts.length+' artifacts</span></div>'+(a?'<div class="sub" style="font-size:12px;margin-top:4px">First message: '+dmy(a.t)+'</div><div class="sub" style="font-size:12px">Last message: '+dmy(b.t)+'</div>':"")+'<div style="margin-top:7px">'+srcChip(c.src)+(c.gaps?'<span class="chip warn">Check: '+c.gaps+' breaks in the chain</span>':'<span class="chip ok">Check: chain intact</span>')+(c.alt?'<span class="chip">'+c.alt+' regenerated replies</span>':"")+'</div>';
- let h="";const L=c.msgs,n=L.length;
+ $("rinfo").innerHTML=srcChip(c.src)+'<span>'+c.msgs.length+' messages · '+sizeTxt(c.bytes)+(c.arts.length?' · '+c.arts.length+' artifacts':'')+'</span>'+(c.gaps?'<span class="chip warn">'+c.gaps+' breaks in the chain</span>':'<span class="chip ok">Chain intact</span>')+(c.alt?'<span class="chip">'+c.alt+' regenerated</span>':"");
+ const L=c.msgs,n=L.length,all=L.map((m,i)=>[m,i]);let h="";
  if(c.gaps)h+='<div class="gap">The message chain has '+c.gaps+' break(s). Your export does not contain the missing messages, so they cannot be recovered from it.</div>';
- if(!n)h+='<p style="color:var(--mu);text-align:center">This chat has no readable messages in the export.</p>';
- if(rall||n<=60)h+=L.map(m=>msgHtml(c,m)).join("");
- else{h+=L.slice(0,25).map(m=>msgHtml(c,m)).join("")+'<div class="more" data-a="readall">Show all '+n+' messages, first to last</div>'+L.slice(n-25).map(m=>msgHtml(c,m)).join("")}
- $("rbody").innerHTML=h}
-
+ if(!n)h+='<p class="sub" style="justify-content:center;margin-top:24px">This chat has no readable messages in the export.</p>';
+ if(rall||n<=60)h+=blockHtml(c,all);
+ else h+=blockHtml(c,all.slice(0,25))+'<div class="more" data-a="readall">Show all '+n+' messages, first to last</div>'+blockHtml(c,all.slice(n-25));
+ $("rbody").innerHTML=h;applyHits()}
+function openChat(k){rkey=k;rall=false;rquery="";rpos=0;const b=$("rsearch");if(b)b.hidden=true;const r=$("rq");if(r)r.value="";go("reader");renderReader();renderSide()}
+function renderSide(){const cur=rkey;$("side").innerHTML='<div class="sidehd"><b>ChatVault</b></div>'+(chats.length?groups(chats).map(([p,l])=>'<div class="sgrp">'+esc(p)+' · '+l.length+'</div>'+l.slice(0,80).map(c=>'<div class="si'+(c.key===cur?" on":"")+'" data-a="open" data-id="'+esc(c.key)+'">'+esc(c.title)+'</div>').join("")).join(""):'<div class="sgrp">No chats yet</div>')+'<div class="sidefoot"><div class="btn sm" data-a="go" data-id="backup">Backups</div><div class="btn sm" data-a="go" data-id="settings">Settings</div></div>'}
 function cnt(){const ch=D.ids.filter(i=>i.startsWith("c|")).map(i=>byKey(i.slice(2))).filter(Boolean),fl=files().filter(f=>D.ids.includes(f.id));
  const na=ch.reduce((a,c)=>a+(D.art?c.arts.length:0),0)+fl.filter(f=>f.kind==="a").length;let ni=0,bytes=ch.reduce((a,c)=>a+c.bytes,0);
  ch.forEach(c=>{if(D.img)c.msgs.forEach(m=>(m.imgs||[]).forEach(r=>{if(!r.missing){ni++;bytes+=r.size||0}}))});
@@ -611,7 +677,7 @@ function demo(){
  backups=[{name:"Demo backup (made-up chats)",size:48e4,mod:Date.now(),srcs:new Set(["gpt","cl"]),n:chats.length}];
  renderAll();go("backup");toast("Demo backup loaded. All names and chats are made up.")}
 
-function renderAll(){renderBackups();renderLib()}
+function renderAll(){renderBackups();renderLib();renderSide()}
 function buildThemes(){$("themes").innerHTML=Object.keys(themes).map(k=>'<div class="cs'+(k===S.theme?" on":"")+'" data-a="theme" data-id="'+k+'" style="background:linear-gradient(135deg,'+themes[k][0]+","+themes[k][1]+')">'+(k===S.theme?ic("check","ic2"):"")+'</div>').join("")}
 function applyTheme(){const t=themes[S.theme]||themes.Violet,r=document.documentElement.style;r.setProperty("--v",t[0]);r.setProperty("--m",t[1]);r.setProperty("--g","linear-gradient(135deg,"+t[0]+","+t[1]+")")}
 function setSettings(){document.querySelectorAll("#fmtseg b").forEach(b=>b.classList.toggle("on",b.dataset.id===S.fmt));
@@ -625,7 +691,7 @@ function assignDlg(){const ids=[...sel].filter(i=>i.startsWith("c|"));if(!ids.le
  showDlg(h);const i=$("asn");i.oninput=()=>{AS.name=i.value}}
 
 const A={
- go:e=>go(e.id),toast:e=>toast(e.m),open:e=>openChat(e.id),
+ go:e=>go(e.id),toast:e=>toast(e.m),open:e=>openChat(e.id),rsopen:()=>{const b=$("rsearch");b.hidden=!b.hidden;if(!b.hidden)$("rq").focus();else{$("rq").value="";runSearch()}},rsclose:()=>{$("rsearch").hidden=true;$("rq").value="";runSearch()},rnext:()=>goHit(rpos+1),rprev:()=>goHit(rpos-1),
  tog:e=>{sel.has(e.id)?sel.delete(e.id):sel.add(e.id);renderLib()},
  togp:e=>{const l=chats.filter(c=>pn(c)===e.id&&(src==="all"||c.src===src));const all=l.every(c=>sel.has("c|"+c.key));l.forEach(c=>all?sel.delete("c|"+c.key):sel.add("c|"+c.key));renderLib()},
  fold:e=>{fold[e.id]=!fold[e.id];renderLib()},more:e=>{lim[e.id]=(lim[e.id]||150)+150;renderLib()},
@@ -649,6 +715,7 @@ const A={
 };
 document.addEventListener("click",ev=>{const el=ev.target.closest("[data-a]");if(el&&A[el.dataset.a])A[el.dataset.a](el.dataset)});
 $("q").addEventListener("input",e=>{q=e.target.value;clearTimeout(tq);tq=setTimeout(renderLib,250)});
+$("rq").addEventListener("input",runSearch);
 $("file").addEventListener("change",e=>{const l=[...e.target.files];e.target.value="";loadFiles(l)});
 const ph=$("phone");ph.addEventListener("dragover",e=>e.preventDefault());ph.addEventListener("drop",e=>{e.preventDefault();loadFiles(e.dataTransfer.files)});
 $("clock").textContent=pad(new Date().getHours())+":"+pad(new Date().getMinutes());
